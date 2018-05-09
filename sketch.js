@@ -1,12 +1,27 @@
-var circle;
-var velo;
+var numOfCircles;
+var veloMult;
+
+var circles = [];
+var velos = [];
+
+function initCircles() {
+  for(var i = 0; i < numOfCircles.value(); i++) {
+    circles[i] = createVector(random(width), random(height));
+    velos[i] = p5.Vector.random2D().mult(veloMult.value());
+  }
+}
 
 function setup() {
-  createCanvas(720, 400);
-  circle = createVector(width / 2, height / 2);
-  velo = p5.Vector.random2D();
-  velo.mult(5.0);
+  createCanvas(1080, 720);
+  createP('');
+  numOfCircles = createSlider(0, 2000, 100);
+  numOfCircles.changed(initCircles);
+  veloMult = createSlider(1, 10, 1);
+  veloMult.changed(initCircles);
+  initCircles();
+  prevValue = numOfCircles.value();
   textSize(32);
+  console.log(velos)
 }
 
 function draw() {
@@ -14,18 +29,19 @@ function draw() {
 
   fill(0, 102, 153, 51);
   noStroke();
-  text('simple one particle test', 10, height - 10);
+  text(`simple ${numOfCircles.value()} particles test`, 10, height - 10);
 
-  stroke(50);
-  fill(100);
-  ellipse(circle.x, circle.y, 24, 24);
-  circle.add(velo);
+  for(var i = 0; i < numOfCircles.value(); i++) {
+    stroke(50);
+    fill(100);
+    ellipse(circles[i].x, circles[i].y, 24, 24);
+    circles[i].add(velos[i]);
+    if(circles[i].x < 0 || circles[i].x > width) {
+      velos[i].x = velos[i].x * -1;
+    }
 
-  if(circle.x < 0 || circle.x > width) {
-    velo.x = velo.x * -1;
-  }
-
-  if(circle.y < 0 || circle.y > height) {
-    velo.y = velo.y * -1;
+    if(circles[i].y < 0 || circles[i].y > height) {
+      velos[i].y = velos[i].y * -1;
+    }
   }
 }
