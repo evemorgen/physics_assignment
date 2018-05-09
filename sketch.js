@@ -1,4 +1,5 @@
 var numOfCircles;
+var lastValue;
 var veloMult;
 
 var circles = [];
@@ -9,6 +10,7 @@ function initCircles() {
     circles[i] = createVector(random(width), random(height));
     velos[i] = p5.Vector.random2D().mult(veloMult.value());
   }
+  lastValue = numOfCircles.value();
 }
 
 function setup() {
@@ -19,7 +21,6 @@ function setup() {
   veloMult = createSlider(1, 10, 1);
   veloMult.changed(initCircles);
   initCircles();
-  prevValue = numOfCircles.value();
   textSize(32);
   console.log(velos)
 }
@@ -29,9 +30,9 @@ function draw() {
 
   fill(0, 102, 153, 51);
   noStroke();
-  text(`simple ${numOfCircles.value()} particles test`, 10, height - 10);
+  text(`simple ${lastValue} particles test`, 10, height - 10);
 
-  for(var i = 0; i < numOfCircles.value(); i++) {
+  for(var i = 0; i < lastValue; i++) {
     stroke(50);
     fill(100);
     ellipse(circles[i].x, circles[i].y, 24, 24);
