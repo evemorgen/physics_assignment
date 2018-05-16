@@ -58,9 +58,9 @@ Particle.prototype.draw = function () {
   if (this.trackMe) {
     stroke('black');
     fill(this.trackColour);
-    ellipse(this.position.x, this.position.y, pSize, pSize);
+    ellipse(this.position.x, this.position.y, this.size, this.size);
     for(var i = 0; i < this.route.length; i++) {
-      ellipse(this.route[i].x, this.route[i].y, 5);
+      ellipse(this.route[i].x, this.route[i].y, this.size / 5);
     }
   } 
 }
@@ -96,7 +96,7 @@ Particle.prototype.updateState = function () {
     this.velocity.y *= -1;
   }
 
-  if (this.trackMe && this.position.dist(this.route.slice(-1).pop()) > 5) {
+  if (this.trackMe && this.position.dist(this.route.slice(-1).pop()) > 10) {
     this.route.push(createVector(this.position.x, this.position.y));
   }
 }
@@ -116,10 +116,10 @@ function initCircles() {
 
 function findAndTrackCircle (x, y) {
   clicked = circles.map((circle) => {
-    if (x >= circle.position.x - pSize && 
-        x <= circle.position.x + pSize &&
-        y >= circle.position.y - pSize &&
-        y <= circle.position.y + pSize) {
+    if (x >= circle.position.x - circle.size && 
+        x <= circle.position.x + circle.size &&
+        y >= circle.position.y - circle.size &&
+        y <= circle.position.y + circle.size) {
       circle.track();
     }
   });
