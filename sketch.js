@@ -17,6 +17,15 @@ function range(from, to) {
   return [...Array(to - from).keys()].map(n => n + from)
 }
 
+function pTemplate(circle) {
+  return `${circle.trackColour} particle <br>
+         - position - (${circle.position.x.toFixed(2)}, ${circle.position.y.toFixed(2)}), <br>
+         - velocity - (${circle.velocity.x.toFixed(2)}, ${circle.velocity.y.toFixed(2)}), <br>
+         - acceleration - (${circle.acceleration.x}, ${circle.acceleration.y}), <br>
+         - size - ${circle.size}, <br>
+         - mass - ${circle.mass}`
+}
+
 function Particle(x, y, vx, vy, ax, ay, m) {
   if (x === undefined || y === undefined) {
     let [x, y] = [random(width), random(height)];
@@ -41,6 +50,11 @@ function Particle(x, y, vx, vy, ax, ay, m) {
 
 Particle.prototype.track = function () {
   this.trackMe = !this.trackMe
+  if (this.trackMe) {
+    this.p = createP(pTemplate(this));
+  } else {
+    this.p.html('');
+  }
 }
 
 Particle.prototype.draw = function () {
@@ -62,6 +76,7 @@ Particle.prototype.draw = function () {
     for(var i = 0; i < this.route.length; i++) {
       ellipse(this.route[i].x, this.route[i].y, this.size / 5);
     }
+    this.p.html(pTemplate(this));
   } 
 }
 
@@ -98,6 +113,7 @@ Particle.prototype.updateState = function () {
 
   if (this.trackMe && this.position.dist(this.route.slice(-1).pop()) > 10) {
     this.route.push(createVector(this.position.x, this.position.y));
+    //FIXME - make route array fixed size with slice or sth
   }
 }
 
@@ -111,7 +127,6 @@ function initCircles() {
   }
   circles[0].track();
   lastValue = numOfCircles.value();
-  //console.log(circles);
 }
 
 function findAndTrackCircle (x, y) {
