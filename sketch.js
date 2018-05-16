@@ -34,6 +34,13 @@ function Particle(x, y, vx, vy, ax, ay, m) {
   this.velocity = createVector(vx, vy);
   this.acceleration = createVector(ax, ay);
   this.collisionFrames = 0;
+  this.trackMe = false;
+  this.trackColour = color(random(100, 255), random(100, 255), random(100, 255));
+  this.route = [createVector(this.position.x, this.position.y)];
+}
+
+Particle.prototype.track = function () {
+  this.trackMe = !this.trackMe
 }
 
 Particle.prototype.draw = function () {
@@ -47,6 +54,15 @@ Particle.prototype.draw = function () {
     fill(100);
     ellipse(this.position.x, this.position.y, this.size, this.size);
   }
+
+  if (this.trackMe) {
+    stroke('black');
+    fill(this.trackColour);
+    ellipse(this.position.x, this.position.y, pSize, pSize);
+    for(var i = 0; i < this.route.length; i++) {
+      ellipse(this.route[i].x, this.route[i].y, 5);
+    }
+  } 
 }
 
 Particle.prototype.collision = function (other) {
@@ -79,6 +95,10 @@ Particle.prototype.updateState = function () {
   if (this.position.y < (this.size / 2) || (this.position.y + this.size / 2) > height) {
     this.velocity.y *= -1;
   }
+
+  if (this.trackMe && this.position.dist(this.route.slice(-1).pop()) > 5) {
+    this.route.push(createVector(this.position.x, this.position.y));
+  }
 }
 
 function initCircles() {
@@ -88,11 +108,25 @@ function initCircles() {
       random(-1 * veloMult.value(), veloMult.value()), random(-1 * veloMult.value(), veloMult.value()),
       0, 0
     )
-    //circles[i] = createVector(random(width), random(height));
-    //velos[i] = p5.Vector.random2D().mult(veloMult.value());
   }
+  circles[0].track();
   lastValue = numOfCircles.value();
   //console.log(circles);
+}
+
+function findAndTrackCircle (x, y) {
+  clicked = circles.map((circle) => {
+    if (x >= circle.position.x - pSize && 
+        x <= circle.position.x + pSize &&
+        y >= circle.position.y - pSize &&
+        y <= circle.position.y + pSize) {
+      circle.track();
+    }
+  });
+}
+
+function mousePressed() {
+  findAndTrackCircle(mouseX, mouseY);
 }
 
 function setup() {
