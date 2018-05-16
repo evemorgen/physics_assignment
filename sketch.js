@@ -5,8 +5,9 @@ var veloMult;
 var circles = [];
 var velos = [];
 
-const pSize = 16;
 const defaultCollFrames = 3;
+const massRange = range(5, 12);
+const massMulti = 2;
 
 let mult = p5.Vector.mult
 let sub = p5.Vector.sub
@@ -16,7 +17,7 @@ function range(from, to) {
   return [...Array(to - from).keys()].map(n => n + from)
 }
 
-function Particle(x, y, vx, vy, ax, ay) {
+function Particle(x, y, vx, vy, ax, ay, m) {
   if (x === undefined || y === undefined) {
     let [x, y] = [random(width), random(height)];
   }
@@ -27,6 +28,8 @@ function Particle(x, y, vx, vy, ax, ay) {
     let [ax, ay] = [random(), random()];
   }
 
+  this.mass = m || random(massRange);
+  this.size = this.mass * massMulti;
   this.position = createVector(x, y);
   this.velocity = createVector(vx, vy);
   this.acceleration = createVector(ax, ay);
@@ -37,25 +40,29 @@ Particle.prototype.draw = function () {
   if (this.collisionFrames > 0) {
     stroke('red');
     fill('pink');
-    ellipse(this.position.x, this.position.y, pSize, pSize); //just testin
+    ellipse(this.position.x, this.position.y, this.size, this.size); //just testin
     this.collisionFrames -= 1;
   } else {
     stroke(50);
     fill(100);
-    ellipse(this.position.x, this.position.y, pSize, pSize);
+    ellipse(this.position.x, this.position.y, this.size, this.size);
   }
 }
 
 Particle.prototype.collision = function (other) {
   let distance = this.position.dist(other.position)
-  if (distance <= pSize) {
+  if (distance <= ((this.size + other.size) / 2)) {
     let v1 = this.velocity;
     let v2 = other.velocity;
     let x1mx2 = sub(this.position, other.position);
     let x2mx1 = sub(other.position, this.position);
+    let m1 = this.mass;
+    let m2 = other.mass;
 
-    this.velocity = sub(v1, mult(x1mx2, dot(sub(v1, v2), x1mx2) / dot(x1mx2, x1mx2)));
-    other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1)));
+    this.velocity = sub(v1, mult(x1mx2, dot(sub(v1, v2), x1mx2) / dot(x1mx2, x1mx2) * (m2 * 2 / (m1 + m2))));
+    other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1) * (m1 * 2 / (m1 + m2))));
+    // this.velocity = sub(v1, mult(x1mx2, dot(sub(v1, v2), x1mx2) / dot(x1mx2, x1mx2)) * (2*m2/(m1+m2)) );
+    // other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1)) * (2*m1/(m1+m2)) );
 
     this.collisionFrames = defaultCollFrames;
     other.collisionFrames = defaultCollFrames;
@@ -66,10 +73,10 @@ Particle.prototype.updateState = function () {
   this.position.add(this.velocity);
   this.velocity.add(this.acceleration);
 
-  if ((this.position.x - pSize / 2) < 0 || (this.position.x + pSize / 2) >= width) {
+  if (this.position.x < (this.size / 2) || (this.position.x + this.size / 2) >= width) {
     this.velocity.x *= -1;
   }
-  if ((this.position.y - pSize / 2) < 0 || (this.position.y + pSize / 2) > height) {
+  if (this.position.y < (this.size / 2) || (this.position.y + this.size / 2) > height) {
     this.velocity.y *= -1;
   }
 }
