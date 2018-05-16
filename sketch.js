@@ -8,6 +8,7 @@ var velos = [];
 const defaultCollFrames = 3;
 const massRange = range(5, 12);
 const massMulti = 2;
+const visibilityMultiplier = 10;
 
 let mult = p5.Vector.mult
 let sub = p5.Vector.sub
@@ -77,6 +78,19 @@ Particle.prototype.draw = function () {
       ellipse(this.route[i].x, this.route[i].y, this.size / 5);
     }
     this.p.html(pTemplate(this));
+
+    let vEnd = createVector(
+      this.position.x + this.velocity.x*visibilityMultiplier, 
+      this.position.y + this.velocity.y*visibilityMultiplier
+    );
+    line(this.position.x, this.position.y, vEnd.x, vEnd.y);
+
+    let aEnd = createVector(
+      this.position.x + this.acceleration.x*visibilityMultiplier, 
+      this.position.y + this.acceleration.y*visibilityMultiplier
+    );
+    line(this.position.x, this.position.y, aEnd.x, aEnd.y);
+
   } 
 }
 
