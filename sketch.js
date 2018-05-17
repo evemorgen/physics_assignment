@@ -5,7 +5,7 @@ var veloMult;
 var circles = [];
 var velos = [];
 
-const defaultCollFrames = 3;
+const defaultCollFrames = 2;
 const massRange = range(5, 12);
 const massMulti = 2;
 const visibilityMultiplier = 10;
@@ -108,6 +108,10 @@ Particle.prototype.collision = function (other) {
     other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1) * (m1 * 2 / (m1 + m2))));
     this.collisionFrames = defaultCollFrames;
     other.collisionFrames = defaultCollFrames;
+    // fix for particles stuck in each other
+    let moveAmount = (this.size + other.size) / 2 - distance;
+    let moveVector = sub(this.position, other.position).normalize().mult(moveAmount);
+    this.position.add(moveVector);
   }
 }
 
