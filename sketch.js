@@ -34,7 +34,7 @@ function makeCard(circle) {
   card = createDiv();
   card.parent(cardsDiv);
   card.addClass('card');
-  cardHeader = createDiv(`${circle.trackColour} particle`);
+  cardHeader = createDiv(`${circle.name} particle`);
   cardHeader.addClass('card-header');
   cardHeader.parent(card);
   cardBody = createDiv();
@@ -68,7 +68,14 @@ function Particle(kwargs) {
   this.collisionFrames = 0;
   
   this.defaultColor = (kwargs.dc === undefined ? true : false);
-  this.trackColour = (kwargs.c !== undefined ? color(kwargs.c) : color(random(100, 255), random(100, 255), random(100, 255)));
+  if (kwargs.c !== undefined) {
+    this.trackColour = color(kwargs.c);
+    [_, this.name, _] = ntc.name(kwargs.c);
+  } else {
+    let [r, g, b] = [random(100, 255) | 0, random(100, 255) | 0, random(100, 255) | 0];
+    this.trackColour = color(r, g, b);
+    [_, this.name, _] = ntc.name(`#${r.toString(16)}${g.toString(16)}${b.toString(16)}`);
+  }
 
   this.trackMe = kwargs.t || false;
   if (this.trackMe) {
