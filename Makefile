@@ -3,7 +3,7 @@ run:
 
 
 deploy:
-	gsutil cp -r src/* gs://physics-assignment/ && gsutil acl ch -u AllUsers:R 'gs://physics-assignment/*'
+	gsutil cp -r src/* gs://physics-assignment/ && gsutil acl ch -r -u AllUsers:R 'gs://physics-assignment/*'
 
 
 clean:
