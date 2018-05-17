@@ -42,29 +42,27 @@ function Particle(kwargs) {
     kwargs.ax = random();
     kwargs.ay = random();
   }
-
-  this.mass = kwargs.m || random(massRange);
-  this.size = this.mass * massMulti;
   this.position = createVector(kwargs.x, kwargs.y);
   this.velocity = createVector(kwargs.vx, kwargs.vy);
   this.acceleration = createVector(kwargs.ax, kwargs.ay);
+
+  this.mass = kwargs.m || random(massRange);
+  this.size = this.mass * massMulti;
   this.collisionFrames = 0;
+  
+  this.defaultColor = (kwargs.dc === undefined ? true : false);
+  this.trackColour = (kwargs.c !== undefined ? color(kwargs.c) : color(random(100, 255), random(100, 255), random(100, 255)));
+
   this.trackMe = kwargs.t || false;
   if (this.trackMe) {
     this.p = createP(pTemplate(this));
   }
-  this.defaultColor = (kwargs.dc === undefined ? true : false);
-  this.trackColour = (kwargs.c !== undefined ? color(kwargs.c) : color(random(100, 255), random(100, 255), random(100, 255))) 
   this.route = [createVector(this.position.x, this.position.y)];
 }
 
 Particle.prototype.track = function () {
   this.trackMe = !this.trackMe
-  if (this.trackMe) {
-    this.p = createP(pTemplate(this));
-  } else {
-    this.p.html('');
-  }
+  this.trackMe ? this.p = createP(pTemplate(this)) : this.p.html('');
 }
 
 Particle.prototype.draw = function () {
@@ -153,15 +151,20 @@ Particle.prototype.updateState = function () {
 
 function initCircles() {
   if (radio.value() == 'random') {
-    for (var i = 0; i < numOfCircles.value(); i++) {
-      circles[i] = new Particle({
-        x: random(width), y: random(height),
-        vx: random(-1 * veloMult.value(), veloMult.value()), vy: random(-1 * veloMult.value(), veloMult.value()),
-        ax: 0, ay: 0
-      })
-    }
-    circles[0].track();
     lastValue = numOfCircles.value();
+    range(0, lastValue).forEach( _ => {
+      circles.push(
+        new Particle({
+          x: random(width), 
+          y: random(height),
+          vx: random(-1 * veloMult.value(), veloMult.value()), 
+          vy: random(-1 * veloMult.value(), veloMult.value()),
+          ax: 0,
+          ay: 0
+        })
+      );
+    });
+    circles[0].track();
   } else if (radio.value() == 'sandbox') {
     particles = JSON.parse(input.value());
     circles = particles.map(
