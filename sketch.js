@@ -3,6 +3,7 @@ var lastValue;
 var veloMult;
 var radio;
 var input;
+var stopTheTrain;
 
 var circles = [];
 var velos = [];
@@ -201,6 +202,7 @@ function createDomElements() {
   radio.value('random');
   radio.changed(initCircles);
   input = createInput();
+  stopTheTrain = createCheckbox('STOP THE TRAIN', false);
 }
 
 function setup() {
@@ -216,10 +218,13 @@ function draw() {
   fill(0, 102, 153, 51);
   noStroke();
   text(`simple ${lastValue} particles test`, 10, height - 10);
-
+  text('Milliseconds running: ' + millis(), 10, 50);
+  let checked = stopTheTrain.checked();
   range(0, lastValue).forEach(i => {
     circles[i].draw();
-    circles[i].updateState();
+    if (!checked) {
+      circles[i].updateState();
+    }
     range(i + 1, lastValue).forEach(j => circles[i].collision(circles[j]));
   });
 }
