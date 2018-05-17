@@ -4,6 +4,7 @@ var veloMult;
 var radio;
 var input;
 var stopTheTrain;
+var cardsDiv;
 
 var circles = [];
 var velos = [];
@@ -22,12 +23,27 @@ function range(from, to) {
 }
 
 function pTemplate(circle) {
-  return `${circle.trackColour} particle <br>
-         - position - (${circle.position.x.toFixed(2)}, ${circle.position.y.toFixed(2)}), <br>
+  return `- position - (${circle.position.x.toFixed(2)}, ${circle.position.y.toFixed(2)}), <br>
          - velocity - (${circle.velocity.x.toFixed(2)}, ${circle.velocity.y.toFixed(2)}), <br>
          - acceleration - (${circle.acceleration.x}, ${circle.acceleration.y}), <br>
          - size - ${circle.size}, <br>
          - mass - ${circle.mass}`
+}
+
+function makeCard(circle) {
+  card = createDiv();
+  card.parent(cardsDiv);
+  card.addClass('card');
+  cardHeader = createDiv(`${circle.name} particle`);
+  cardHeader.addClass('card-header');
+  cardHeader.parent(card);
+  cardBody = createDiv();
+  cardBody.addClass('card-body');
+  cardBody.parent(card);
+  p = createP(pTemplate(circle));
+  p.addClass('card-text');
+  p.parent(cardBody);
+  return [card, p]
 }
 
 function Particle(kwargs) {
@@ -36,12 +52,12 @@ function Particle(kwargs) {
     kwargs.y = random(height);
   }
   if (kwargs.vx === undefined || kwargs.vy === undefined) {
-    kwargs.vx = random();
-    kwargs.vy = random();
+    kwargs.vx = random(-1, 1);
+    kwargs.vy = random(-1, 1);
   }
   if (kwargs.ax === undefined || kwargs.ay === undefined) {
-    kwargs.ax = random();
-    kwargs.ay = random();
+    kwargs.ax = random(-1, 1);
+    kwargs.ay = random(-1, 1);
   }
   this.position = createVector(kwargs.x, kwargs.y);
   this.velocity = createVector(kwargs.vx, kwargs.vy);
@@ -52,18 +68,27 @@ function Particle(kwargs) {
   this.collisionFrames = 0;
   
   this.defaultColor = (kwargs.dc === undefined ? true : false);
-  this.trackColour = (kwargs.c !== undefined ? color(kwargs.c) : color(random(100, 255), random(100, 255), random(100, 255)));
+  if (kwargs.c !== undefined) {
+    this.trackColour = color(kwargs.c);
+    [_, this.name, _] = ntc.name(kwargs.c);
+  } else {
+    let [r, g, b] = [random(100, 255) | 0, random(100, 255) | 0, random(100, 255) | 0];
+    this.trackColour = color(r, g, b);
+    [_, this.name, _] = ntc.name(`#${r.toString(16)}${g.toString(16)}${b.toString(16)}`);
+  }
 
   this.trackMe = kwargs.t || false;
   if (this.trackMe) {
-    this.p = createP(pTemplate(this));
+    //this.p = createP(pTemplate(this));
+    [this.card, this.p] = makeCard(this);
   }
   this.route = [createVector(this.position.x, this.position.y)];
 }
 
 Particle.prototype.track = function () {
   this.trackMe = !this.trackMe
-  this.trackMe ? this.p = createP(pTemplate(this)) : this.p.html('');
+  //this.trackMe ? this.p = createP(pTemplate(this)) : this.p.html('');
+  this.trackMe ? [this.card, this.p] = makeCard(this) : this.card.hide();
 }
 
 Particle.prototype.draw = function () {
@@ -152,6 +177,7 @@ Particle.prototype.updateState = function () {
 
 function initCircles() {
   if (radio.value() == 'random') {
+    cardsDiv.html('');
     lastValue = numOfCircles.value();
     range(0, lastValue).forEach( _ => {
       circles.push(
@@ -167,6 +193,7 @@ function initCircles() {
     });
     circles[0].track();
   } else if (radio.value() == 'sandbox') {
+    cardsDiv.html('');
     particles = JSON.parse(input.value());
     circles = particles.map(
       (props) => new Particle(props)
@@ -194,15 +221,18 @@ function createDomElements() {
   createP('');
   numOfCircles = createSlider(0, 500, 150);
   numOfCircles.changed(initCircles);
+  stopTheTrain = createCheckbox('STOP THE TRAIN', false);
   veloMult = createSlider(1, 10, 4);
   veloMult.changed(initCircles);
+  createDiv().style('width', '100%');
   radio = createRadio();
   radio.option('random');
   radio.option('sandbox');
   radio.value('random');
   radio.changed(initCircles);
-  input = createInput();
-  stopTheTrain = createCheckbox('STOP THE TRAIN', false);
+  radioDiv = createDiv().addClass('radios').child(radio);
+  input = createInput().attribute('placeholder', 'sandbox data json input');
+  cardsDiv = createDiv().addClass('cards-container');
 }
 
 function setup() {
