@@ -4,6 +4,7 @@ var veloMult;
 var radio;
 var input;
 var stopTheTrain;
+var cardsDiv;
 
 var circles = [];
 var velos = [];
@@ -22,12 +23,27 @@ function range(from, to) {
 }
 
 function pTemplate(circle) {
-  return `${circle.trackColour} particle <br>
-         - position - (${circle.position.x.toFixed(2)}, ${circle.position.y.toFixed(2)}), <br>
+  return `- position - (${circle.position.x.toFixed(2)}, ${circle.position.y.toFixed(2)}), <br>
          - velocity - (${circle.velocity.x.toFixed(2)}, ${circle.velocity.y.toFixed(2)}), <br>
          - acceleration - (${circle.acceleration.x}, ${circle.acceleration.y}), <br>
          - size - ${circle.size}, <br>
          - mass - ${circle.mass}`
+}
+
+function makeCard(circle) {
+  card = createDiv();
+  card.parent(cardsDiv);
+  card.addClass('card');
+  cardHeader = createDiv(`${circle.trackColour} particle`);
+  cardHeader.addClass('card-header');
+  cardHeader.parent(card);
+  cardBody = createDiv();
+  cardBody.addClass('card-body');
+  cardBody.parent(card);
+  p = createP(pTemplate(circle));
+  p.addClass('card-text');
+  p.parent(cardBody);
+  return [card, p]
 }
 
 function Particle(kwargs) {
@@ -56,14 +72,16 @@ function Particle(kwargs) {
 
   this.trackMe = kwargs.t || false;
   if (this.trackMe) {
-    this.p = createP(pTemplate(this));
+    //this.p = createP(pTemplate(this));
+    [this.card, this.p] = makeCard(this);
   }
   this.route = [createVector(this.position.x, this.position.y)];
 }
 
 Particle.prototype.track = function () {
   this.trackMe = !this.trackMe
-  this.trackMe ? this.p = createP(pTemplate(this)) : this.p.html('');
+  //this.trackMe ? this.p = createP(pTemplate(this)) : this.p.html('');
+  this.trackMe ? [this.card, this.p] = makeCard(this) : this.card.hide();
 }
 
 Particle.prototype.draw = function () {
@@ -194,15 +212,18 @@ function createDomElements() {
   createP('');
   numOfCircles = createSlider(0, 500, 150);
   numOfCircles.changed(initCircles);
+  stopTheTrain = createCheckbox('STOP THE TRAIN', false);
   veloMult = createSlider(1, 10, 4);
   veloMult.changed(initCircles);
+  createDiv().style('width', '100%');
   radio = createRadio();
   radio.option('random');
   radio.option('sandbox');
   radio.value('random');
   radio.changed(initCircles);
-  input = createInput();
-  stopTheTrain = createCheckbox('STOP THE TRAIN', false);
+  radioDiv = createDiv().addClass('radios').child(radio);
+  input = createInput().attribute('placeholder', 'sandbox data json input');
+  cardsDiv = createDiv().addClass('cards-container');
 }
 
 function setup() {

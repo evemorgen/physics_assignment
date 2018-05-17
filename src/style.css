@@ -89,4 +89,46 @@
     -webkit-box-shadow: 0 0 0 1px #555555, 0 0 8px transparent inset;
             box-shadow: 0 0 0 1px #555555, 0 0 8px transparent inset;
   }
+
+  .radios {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
+  .radios > div > input[type="radio"] {
+    width: 20px;
+  }
+
+  .radios > div > label {
+    padding: 10px;
+  }
+
+  input[type="text"] {
+    width: 100%;
+  }
+  
+  .card {
+    width: 18rem;
+    margin: 10px;
+  }
+
+  input[type="text"]::-webkit-input-placeholder {
+    text-align: center;
+  }
+
+  input[type="text"]::-moz-placeholder {  /* Firefox 19+ */
+    text-align: center;  
+  }
+
+  input[type="checkbox"] {
+    margin: 5px;
+  }
+
+  .cards-container {
+    display: inherit;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
