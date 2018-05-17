@@ -177,6 +177,7 @@ Particle.prototype.updateState = function () {
 
 function initCircles() {
   if (radio.value() == 'random') {
+    cardsDiv.html('');
     lastValue = numOfCircles.value();
     range(0, lastValue).forEach( _ => {
       circles.push(
@@ -192,6 +193,7 @@ function initCircles() {
     });
     circles[0].track();
   } else if (radio.value() == 'sandbox') {
+    cardsDiv.html('');
     particles = JSON.parse(input.value());
     circles = particles.map(
       (props) => new Particle(props)
