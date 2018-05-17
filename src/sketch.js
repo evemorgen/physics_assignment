@@ -36,12 +36,12 @@ function Particle(kwargs) {
     kwargs.y = random(height);
   }
   if (kwargs.vx === undefined || kwargs.vy === undefined) {
-    kwargs.vx = random();
-    kwargs.vy = random();
+    kwargs.vx = random(-1, 1);
+    kwargs.vy = random(-1, 1);
   }
   if (kwargs.ax === undefined || kwargs.ay === undefined) {
-    kwargs.ax = random();
-    kwargs.ay = random();
+    kwargs.ax = random(-1, 1);
+    kwargs.ay = random(-1, 1);
   }
   this.position = createVector(kwargs.x, kwargs.y);
   this.velocity = createVector(kwargs.vx, kwargs.vy);
