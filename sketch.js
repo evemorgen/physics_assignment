@@ -106,9 +106,6 @@ Particle.prototype.collision = function (other) {
 
     this.velocity = sub(v1, mult(x1mx2, dot(sub(v1, v2), x1mx2) / dot(x1mx2, x1mx2) * (m2 * 2 / (m1 + m2))));
     other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1) * (m1 * 2 / (m1 + m2))));
-    // this.velocity = sub(v1, mult(x1mx2, dot(sub(v1, v2), x1mx2) / dot(x1mx2, x1mx2)) * (2*m2/(m1+m2)) );
-    // other.velocity = sub(v2, mult(x2mx1, dot(sub(v2, v1), x2mx1) / dot(x2mx1, x2mx1)) * (2*m1/(m1+m2)) );
-
     this.collisionFrames = defaultCollFrames;
     other.collisionFrames = defaultCollFrames;
   }
@@ -118,10 +115,22 @@ Particle.prototype.updateState = function () {
   this.position.add(this.velocity);
   this.velocity.add(this.acceleration);
 
-  if (this.position.x < (this.size / 2) || (this.position.x + this.size / 2) >= width) {
+  if (this.position.x < this.size / 2) {
+    this.position.x = this.size / 2
+    this.collisionFrames = 1;
+    this.velocity.x *= -1;
+  } else if (this.position.x > width - this.size / 2) {
+    this.collisionFrames = 1;
+    this.position.x = width - this.size / 2;
     this.velocity.x *= -1;
   }
-  if (this.position.y < (this.size / 2) || (this.position.y + this.size / 2) > height) {
+  if (this.position.y < this.size / 2) {
+    this.collisionFrames = 1;
+    this.position.y = this.size / 2;
+    this.velocity.y *= -1;
+  } else if (this.position.y > height - this.size / 2) {
+    this.collisionFrames = 1;
+    this.position.y = height - this.size / 2;
     this.velocity.y *= -1;
   }
 
