@@ -10,3 +10,8 @@
   2. `cd ~/physics_assignment && python -m SimpleHTTPServer`
   3. open `http://localhost:8000` in your favorite web browser
   3. change sketch.js or its dependencies and refresh webpage
+
+## Deploy:
+```bash
+gsutil cp -r src/* gs://physics-assignment/ && gsutil acl ch -u AllUsers:R 'gs://physics-assignment/*'
+```
