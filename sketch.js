@@ -1,6 +1,8 @@
 var numOfCircles;
 var lastValue;
 var veloMult;
+var radio;
+var input;
 
 var circles = [];
 var velos = [];
@@ -27,25 +29,32 @@ function pTemplate(circle) {
          - mass - ${circle.mass}`
 }
 
-function Particle(x, y, vx, vy, ax, ay, m) {
-  if (x === undefined || y === undefined) {
-    let [x, y] = [random(width), random(height)];
+function Particle(kwargs) {
+  if (kwargs.x === undefined || kwargs.y === undefined) {
+    kwargs.x = random(width); 
+    kwargs.y = random(height);
   }
-  if (vx === undefined || vy === undefined) {
-    let [vx, vy] = [random(), random()];
+  if (kwargs.vx === undefined || kwargs.vy === undefined) {
+    kwargs.vx = random();
+    kwargs.vy = random();
   }
-  if (ax === undefined || ay === undefined) {
-    let [ax, ay] = [random(), random()];
+  if (kwargs.ax === undefined || kwargs.ay === undefined) {
+    kwargs.ax = random();
+    kwargs.ay = random();
   }
 
-  this.mass = m || random(massRange);
+  this.mass = kwargs.m || random(massRange);
   this.size = this.mass * massMulti;
-  this.position = createVector(x, y);
-  this.velocity = createVector(vx, vy);
-  this.acceleration = createVector(ax, ay);
+  this.position = createVector(kwargs.x, kwargs.y);
+  this.velocity = createVector(kwargs.vx, kwargs.vy);
+  this.acceleration = createVector(kwargs.ax, kwargs.ay);
   this.collisionFrames = 0;
-  this.trackMe = false;
-  this.trackColour = color(random(100, 255), random(100, 255), random(100, 255));
+  this.trackMe = kwargs.t || false;
+  if (this.trackMe) {
+    this.p = createP(pTemplate(this));
+  }
+  this.defaultColor = (kwargs.dc === undefined ? true : false);
+  this.trackColour = (kwargs.c !== undefined ? color(kwargs.c) : color(random(100, 255), random(100, 255), random(100, 255))) 
   this.route = [createVector(this.position.x, this.position.y)];
 }
 
@@ -66,7 +75,7 @@ Particle.prototype.draw = function () {
     this.collisionFrames -= 1;
   } else {
     stroke(50);
-    fill(100);
+    this.defaultColor ? fill(100) : fill(this.trackColour);
     ellipse(this.position.x, this.position.y, this.size, this.size);
   }
 
@@ -74,9 +83,7 @@ Particle.prototype.draw = function () {
     stroke('black');
     fill(this.trackColour);
     ellipse(this.position.x, this.position.y, this.size, this.size);
-    for(var i = 0; i < this.route.length; i++) {
-      ellipse(this.route[i].x, this.route[i].y, this.size / 5);
-    }
+    this.route.map((point) => ellipse(point.x, point.y, this.size / 5));
     this.p.html(pTemplate(this));
 
     let vEnd = createVector(
@@ -145,15 +152,23 @@ Particle.prototype.updateState = function () {
 }
 
 function initCircles() {
-  for (var i = 0; i < numOfCircles.value(); i++) {
-    circles[i] = new Particle(
-      random(width), random(height),
-      random(-1 * veloMult.value(), veloMult.value()), random(-1 * veloMult.value(), veloMult.value()),
-      0, 0
-    )
+  if (radio.value() == 'random') {
+    for (var i = 0; i < numOfCircles.value(); i++) {
+      circles[i] = new Particle({
+        x: random(width), y: random(height),
+        vx: random(-1 * veloMult.value(), veloMult.value()), vy: random(-1 * veloMult.value(), veloMult.value()),
+        ax: 0, ay: 0
+      })
+    }
+    circles[0].track();
+    lastValue = numOfCircles.value();
+  } else if (radio.value() == 'sandbox') {
+    particles = JSON.parse(input.value());
+    circles = particles.map(
+      (props) => new Particle(props)
+    );
+    lastValue = circles.length;
   }
-  circles[0].track();
-  lastValue = numOfCircles.value();
 }
 
 function findAndTrackCircle (x, y) {
@@ -171,13 +186,23 @@ function mousePressed() {
   findAndTrackCircle(mouseX, mouseY);
 }
 
-function setup() {
-  createCanvas(1080, 720);
+function createDomElements() {
   createP('');
   numOfCircles = createSlider(0, 500, 150);
   numOfCircles.changed(initCircles);
   veloMult = createSlider(1, 10, 4);
   veloMult.changed(initCircles);
+  radio = createRadio();
+  radio.option('random');
+  radio.option('sandbox');
+  radio.value('random');
+  radio.changed(initCircles);
+  input = createInput();
+}
+
+function setup() {
+  createCanvas(1080, 720);
+  createDomElements();
   initCircles();
   textSize(32);
 }
