@@ -7,7 +7,7 @@
 
 ## Development:
   1. `git clone https://github.com/evemorgen/physics_assignment.git`
-  2. `cd project_directory && make run`
+  2. `cd physics_assignment && make run`
   3. open `http://localhost:8000` in your favorite web browser
   3. change sketch.js or its dependencies and refresh webpage
 
