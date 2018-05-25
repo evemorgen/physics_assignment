@@ -3,7 +3,7 @@ run:
 
 
 deploy:
-	gsutil cp -r src/* gs://physics-assignment/ && gsutil acl ch -r -u AllUsers:R 'gs://physics-assignment/*'
+	git subtree push --prefix src origin gh-pages
 
 
 clean:
