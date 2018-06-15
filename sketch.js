@@ -64,7 +64,7 @@ function Particle(kwargs) {
   this.acceleration = createVector(kwargs.ax, kwargs.ay);
 
   this.mass = kwargs.m || random(massRange);
-  this.size = this.mass * massMulti;
+  this.size = kwargs.s || this.mass * massMulti;
   this.collisionFrames = 0;
   
   this.defaultColor = (kwargs.dc === undefined ? true : false);
