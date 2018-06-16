@@ -108,7 +108,15 @@ Particle.prototype.draw = function () {
     stroke('black');
     fill(this.trackColour);
     ellipse(this.position.x, this.position.y, this.size, this.size);
-    this.route.map((point) => ellipse(point.x, point.y, this.size / 5));
+
+    // this.route.forEach((point) => ellipse(point.x, point.y, this.size / 5));
+    stroke(130);
+    this.route.reduce((oldPoint, point) => {
+      line(point.x, point.y, oldPoint.x, oldPoint.y);
+      return point;
+    });
+    stroke(0);
+
     this.p.html(pTemplate(this));
 
     let vEnd = createVector(
@@ -117,11 +125,11 @@ Particle.prototype.draw = function () {
     );
     line(this.position.x, this.position.y, vEnd.x, vEnd.y);
 
-    let aEnd = createVector(
-      this.position.x + this.acceleration.x*visibilityMultiplier, 
-      this.position.y + this.acceleration.y*visibilityMultiplier
-    );
-    line(this.position.x, this.position.y, aEnd.x, aEnd.y);
+    // let aEnd = createVector(
+    //   this.position.x + this.acceleration.x*visibilityMultiplier, 
+    //   this.position.y + this.acceleration.y*visibilityMultiplier
+    // );
+    // line(this.position.x, this.position.y, aEnd.x, aEnd.y);
 
   } 
 }
@@ -208,6 +216,7 @@ function initCircles() {
     );
     lastValue = circles.length;
   }
+  chart && chart.update({title: {text: `Mean square displacement of ${lastValue} particles`}})
 }
 
 function findAndTrackCircle (x, y) {
@@ -247,7 +256,7 @@ function createDomElements() {
 chart = null;
 
 function setup() {
-  createCanvas(1080, 720);
+  createCanvas(1080, 640);
   createDomElements();
   initCircles();
   textSize(32);
@@ -278,9 +287,9 @@ function updateChart(dataPoint) {
   chart.redraw(false);
 }
 
-function generateChart() {
+function generateChart(num) {
   return Highcharts.chart('chart', {
-    title: {text: 'Mean square displacement of particles'},
+    title: {text: `Mean square displacement of ${lastValue} particles`},
     yAxis: {title: { text: 'Mean square displacement'}},
     xAxis: {title: {text: 'Time' }},  
 
@@ -293,6 +302,7 @@ function generateChart() {
         }
     },
     chart: {
+      type: 'spline',
 			events: {
 				click: function(e){
           let x = chart.series[0].data.map(d => d.x);
@@ -308,7 +318,7 @@ function generateChart() {
 		},
 		boost: {useGPUTranslations: true},
     series: [{
-        name: 'Total mean square displacmeent',
+        name: 'Total mean square displacement',
         data: []
     }],
   });
