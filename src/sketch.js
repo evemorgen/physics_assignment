@@ -10,7 +10,7 @@ var circles = [];
 var velos = [];
 
 const defaultCollFrames = 2;
-const massRange = range(5, 12);
+const massRange = range(5, 6);
 const massMulti = 2;
 const visibilityMultiplier = 10;
 
@@ -60,6 +60,7 @@ function Particle(kwargs) {
     kwargs.ay = random(-1, 1);
   }
   this.position = createVector(kwargs.x, kwargs.y);
+  this.initPosition = createVector(kwargs.x, kwargs.y);
   this.velocity = createVector(kwargs.vx, kwargs.vy);
   this.acceleration = createVector(kwargs.ax, kwargs.ay);
 
@@ -107,7 +108,15 @@ Particle.prototype.draw = function () {
     stroke('black');
     fill(this.trackColour);
     ellipse(this.position.x, this.position.y, this.size, this.size);
-    this.route.map((point) => ellipse(point.x, point.y, this.size / 5));
+
+    // this.route.forEach((point) => ellipse(point.x, point.y, this.size / 5));
+    stroke(130);
+    this.route.reduce((oldPoint, point) => {
+      line(point.x, point.y, oldPoint.x, oldPoint.y);
+      return point;
+    });
+    stroke(0);
+
     this.p.html(pTemplate(this));
 
     let vEnd = createVector(
@@ -116,11 +125,11 @@ Particle.prototype.draw = function () {
     );
     line(this.position.x, this.position.y, vEnd.x, vEnd.y);
 
-    let aEnd = createVector(
-      this.position.x + this.acceleration.x*visibilityMultiplier, 
-      this.position.y + this.acceleration.y*visibilityMultiplier
-    );
-    line(this.position.x, this.position.y, aEnd.x, aEnd.y);
+    // let aEnd = createVector(
+    //   this.position.x + this.acceleration.x*visibilityMultiplier, 
+    //   this.position.y + this.acceleration.y*visibilityMultiplier
+    // );
+    // line(this.position.x, this.position.y, aEnd.x, aEnd.y);
 
   } 
 }
@@ -144,6 +153,10 @@ Particle.prototype.collision = function (other) {
     let moveVector = sub(this.position, other.position).normalize().mult(moveAmount);
     this.position.add(moveVector);
   }
+}
+
+Particle.prototype.displacement = function () {
+  return sub(this.position, this.initPosition).mag();
 }
 
 Particle.prototype.updateState = function () {
@@ -176,6 +189,9 @@ Particle.prototype.updateState = function () {
 }
 
 function initCircles() {
+  chart && chart.series[0].update({data: []});
+  chart && chart.series[1] && chart.series[1].update({data: []});
+  circles = [];
   if (radio.value() == 'random') {
     cardsDiv.html('');
     lastValue = numOfCircles.value();
@@ -200,6 +216,7 @@ function initCircles() {
     );
     lastValue = circles.length;
   }
+  chart && chart.update({title: {text: `Mean square displacement of ${lastValue} particles`}})
 }
 
 function findAndTrackCircle (x, y) {
@@ -232,14 +249,18 @@ function createDomElements() {
   radio.changed(initCircles);
   radioDiv = createDiv().addClass('radios').child(radio);
   input = createInput().attribute('placeholder', 'sandbox data json input');
+  createDiv().id('chart');
   cardsDiv = createDiv().addClass('cards-container');
 }
 
+chart = null;
+
 function setup() {
-  createCanvas(1080, 720);
+  createCanvas(1080, 640);
   createDomElements();
   initCircles();
   textSize(32);
+  chart = generateChart();
 }
 
 function draw() {
@@ -248,7 +269,7 @@ function draw() {
   fill(0, 102, 153, 51);
   noStroke();
   text(`simple ${lastValue} particles test`, 10, height - 10);
-  text('Milliseconds running: ' + millis(), 10, 50);
+  text('Milliseconds running: ' + (millis()|0), 10, 50);
   let checked = stopTheTrain.checked();
   range(0, lastValue).forEach(i => {
     circles[i].draw();
@@ -257,5 +278,65 @@ function draw() {
     }
     range(i + 1, lastValue).forEach(j => circles[i].collision(circles[j]));
   });
+  let meanSquareDisplacement = circles.map(c => Math.pow(c.displacement(), 2)).reduce((a, b) => a + b) / lastValue;
+  !checked && chart && updateChart(meanSquareDisplacement);
 }
 
+function updateChart(dataPoint) {
+  chart.series[0].addPoint(dataPoint, false);
+  chart.redraw(false);
+}
+
+function generateChart(num) {
+  return Highcharts.chart('chart', {
+    title: {text: `Mean square displacement of ${lastValue} particles`},
+    yAxis: {title: { text: 'Mean square displacement'}},
+    xAxis: {title: {text: 'Time' }},  
+
+    plotOptions: {
+        series: {
+            label: {
+                connectorAllowed: false
+            },
+            pointStart: 0
+        }
+    },
+    chart: {
+      type: 'spline',
+			events: {
+				click: function(e){
+          let x = chart.series[0].data.map(d => d.x);
+          let y = chart.series[0].data.map(d => d.y);
+          chart.series.length > 1 && chart.series[1].remove();
+					chart.addSeries({
+            name: 'Linear regression',
+            data: findLineByLeastSquares(x,y),
+            color: 'Red'
+          });
+				}
+			}
+		},
+		boost: {useGPUTranslations: true},
+    series: [{
+        name: 'Total mean square displacement',
+        data: []
+    }],
+  });
+} 
+
+
+function findLineByLeastSquares(xs, ys) {
+  var sum_x = xs.reduce((sum,x) => sum+x);
+  var sum_y = ys.reduce((sum,y) => sum+y);
+  var sum_xy = xs.reduce((sum,x,i) => sum + x * ys[i]);
+  var sum_xx = xs.reduce((sum,x) => sum + x*x);
+  var count = xs.length;
+
+  var m = (count*sum_xy - sum_x*sum_y) / (count*sum_xx - sum_x*sum_x);
+  var b = (sum_y/count) - (m*sum_x)/count;
+
+  let x0 = xs[0];
+  let xn = xs[count-1];
+
+  return [[x0, x0 * m + b], [xn, xn * m + b]];
+}
