@@ -110,11 +110,13 @@ Particle.prototype.draw = function () {
     ellipse(this.position.x, this.position.y, this.size, this.size);
 
     // this.route.forEach((point) => ellipse(point.x, point.y, this.size / 5));
-    stroke(130);
+    stroke(this.trackColour);
+    strokeWeight(3);
     this.route.reduce((oldPoint, point) => {
       line(point.x, point.y, oldPoint.x, oldPoint.y);
       return point;
     });
+    strokeWeight(1);
     stroke(0);
 
     this.p.html(pTemplate(this));
@@ -215,6 +217,21 @@ function initCircles() {
       (props) => new Particle(props)
     );
     lastValue = circles.length;
+  } else if (radio.value() == 'cradle') {
+    circles = cradle.map(
+      (props) => new Particle(props)
+    );
+    lastValue = circles.length;
+  } else if (radio.value() == 'diffusion') {
+    circles = diffuse.map(
+      (props) => new Particle(props)
+    );
+    lastValue = circles.length;
+  } else if (radio.value() == 'membrane') {
+     circles = membrane.map(
+      (props) => new Particle(props)
+    );
+    lastValue = circles.length;
   }
   chart && chart.update({title: {text: `Mean square displacement of ${lastValue} particles`}})
 }
@@ -244,6 +261,9 @@ function createDomElements() {
   createDiv().style('width', '100%');
   radio = createRadio();
   radio.option('random');
+  radio.option('cradle');
+  radio.option('diffusion');
+  radio.option('membrane');
   radio.option('sandbox');
   radio.value('random');
   radio.changed(initCircles);
