@@ -293,7 +293,7 @@ function pause() {
 }
 
 function createDomElements() {
-  stopTheTrain = createButton('PAUSE');
+  stopTheTrain = createButton('STOP THE TRAIN');
   stopTheTrain.mousePressed(pause);
   stopTheTrain.style('width', '100%');
   createP('');
