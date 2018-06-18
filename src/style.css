@@ -2,6 +2,7 @@
  #container div {
     float: left;
     width: 25%;
+    text-align: center;
  }
   body {
     max-width: 1080px;
