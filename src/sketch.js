@@ -280,7 +280,7 @@ function initCircles() {
 
 function findAndTrackCircle (x, y) {
   let clickedVector = createVector(x,y);
-  circles.filter(c => c.position.dist(clickedVector) < c.size).forEach(c => c.track());
+  circles.filter(c => c.position.dist(clickedVector) <= (c.size/2)).forEach(c => c.track());
 }
 
 function mousePressed() {
