@@ -292,11 +292,17 @@ function pause() {
     running = !running;
 }
 
+var textDiv = null;
+
 function createDomElements() {
-  stopTheTrain = createButton('STOP THE TRAIN');
+  stopTheTrain = createButton('PAUSE');
   stopTheTrain.mousePressed(pause);
   stopTheTrain.style('width', '100%');
-  createP('');
+  
+  textDiv = createDiv().id('container');
+  textDiv.style('width', '100%');
+  textDiv.html("<div>N of circles</div><div>Velocity</div><div>Size</div><div>Size range</div>")
+  
   numOfCircles = createSlider(1, 500, 150);
   numOfCircles.changed(initCircles);
   veloMult = createSlider(1, 10, 4);
@@ -405,4 +411,3 @@ function draw() {
   chart && nFrames < chartLimit && drawMeanSquareDisp(); 
   nFrames == chartLimit && drawLinearRegression();
 }
-
