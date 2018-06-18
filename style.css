@@ -1,4 +1,8 @@
   
+ #container div {
+    float: left;
+    width: 25%;
+ }
   body {
     max-width: 1080px;
     padding: 50px 0;
